@@ -12,7 +12,11 @@ func jsFilter(str [][]string) [][]string {
 
 	//对不需要的数据过滤
 	for i := range str {
-		str[i][0], _ = url.QueryUnescape(str[i][1])
+		u, err := url.QueryUnescape(str[i][1])
+		if err != nil {
+			u = str[i][1]
+		}
+		str[i][0] = u
 		str[i][0] = strings.TrimSpace(str[i][0])
 		str[i][0] = strings.Replace(str[i][0], " ", "", -1)
 		str[i][0] = strings.Replace(str[i][0], "\\/", "/", -1)
@@ -44,7 +48,11 @@ func urlFilter(str [][]string) [][]string {
 
 	//对不需要的数据过滤
 	for i := range str {
-		str[i][0], _ = url.QueryUnescape(str[i][1])
+		u, err := url.QueryUnescape(str[i][1])
+		if err != nil {
+			u = str[i][1]
+		}
+		str[i][0] = u
 		str[i][0] = strings.TrimSpace(str[i][0])
 		str[i][0] = strings.Replace(str[i][0], " ", "", -1)
 		str[i][0] = strings.Replace(str[i][0], "\\/", "/", -1)

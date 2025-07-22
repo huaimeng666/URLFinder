@@ -53,11 +53,17 @@ func Spider(u string, num int) {
 	request.Header.Set("Accept-Encoding", "gzip") //使用gzip压缩传输数据让访问更快
 	request.Header.Set("User-Agent", util.GetUserAgent())
 	request.Header.Set("Accept", "*/*")
-	//增加header选项
+	// 增加header选项
 	if cmd.C != "" {
 		request.Header.Set("Cookie", cmd.C)
 	}
-	//加载yaml配置(headers)
+	// 添加Referer
+	if referer, ok := result.Jstourl[u]; ok {
+		request.Header.Set("Referer", referer)
+	} else if referer, ok := result.Urltourl[u]; ok {
+		request.Header.Set("Referer", referer)
+	}
+	// 加载yaml配置(headers)
 	if cmd.I {
 		util.SetHeadersConfig(&request.Header)
 	}
@@ -91,23 +97,36 @@ func Spider(u string, num int) {
 		resultBody = string(dataBytes)
 	}
 
-	path := response.Request.URL.Path
-	host := response.Request.URL.Host
-	scheme := response.Request.URL.Scheme
-	source := scheme + "://" + host + path
 	//处理base标签
-	re := regexp.MustCompile(`base.{1,5}href.{1,5}(http.+?//[^\s]+?)["'‘“]`)
-	base := re.FindAllStringSubmatch(resultBody, -1)
-	if len(base) > 0 {
-		host = regexp.MustCompile(`http.*?//([^/]+)`).FindAllStringSubmatch(base[0][1], -1)[0][1]
-		scheme = regexp.MustCompile(`(http.*?)://`).FindAllStringSubmatch(base[0][1], -1)[0][1]
-		paths := regexp.MustCompile(`http.*?//.*?(/.*)`).FindAllStringSubmatch(base[0][1], -1)
-		if len(paths) > 0 {
-			path = paths[0][1]
-		} else {
-			path = "/"
+	var baseHref string
+	baseRegex := regexp.MustCompile(`(?i)<base\s+href\s*=\s*["']([^"']+)["']`)
+	baseMatch := baseRegex.FindStringSubmatch(resultBody)
+	if len(baseMatch) > 1 {
+		baseHref = baseMatch[1]
+	} else {
+		baseVarRegex := regexp.MustCompile(`(?i)(?:base|baseUrl|basePath)\s*[:=]\s*["']([^"']+)["']`)
+		baseVarMatch := baseVarRegex.FindStringSubmatch(resultBody)
+		if len(baseVarMatch) > 1 {
+			baseHref = baseVarMatch[1]
 		}
 	}
+
+	baseURL, err := url.Parse(u)
+	if err != nil {
+		return
+	}
+
+	if baseHref != "" {
+		base, err := url.Parse(baseHref)
+		if err == nil {
+			baseURL = baseURL.ResolveReference(base)
+		}
+	}
+
+	path := baseURL.Path
+	host := baseURL.Host
+	scheme := baseURL.Scheme
+	source := scheme + "://" + host + path
 	is = false
 	<-config.Ch
 	//提取js

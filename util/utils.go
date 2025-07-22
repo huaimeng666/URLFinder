@@ -343,6 +343,7 @@ func Del404(urls []mode.Link) []mode.Link {
 var (
 
 	// for each request, a random UA will be selected from this list
+	// 每次请求，将从此列表中选择一个随机UA
 	uas = [...]string{
 		"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.5304.68 Safari/537.36",
 		"Mozilla/5.0 (Windows NT 6.3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.5249.61 Safari/537.36",

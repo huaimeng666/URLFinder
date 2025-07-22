@@ -71,7 +71,7 @@ var (
 	IDcard    = []string{`[^0-9]((\d{8}(0\d|10|11|12)([0-2]\d|30|31)\d{3}$)|(\d{6}(18|19|20)\d{2}(0[1-9]|10|11|12)([0-2]\d|30|31)\d{3}(\d|X|x)))[^0-9]`}
 	Jwt       = []string{`'"` + "`" + `(ey[A-Za-z0-9_-]{10,}\.[A-Za-z0-9._-]{10,}|ey[A-Za-z0-9_\/+-]{10,}\.[A-Za-z0-9._\/+-]{10,})` + "`" + `'"`}
 	UUIDToken = []string{`'"` + "`" + `?([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})` + "`" + `?"`}
-	AKSK      = []string{`(?i)["']{0,1}(secret|access|security|"ak"|"sk"|'ak'|'sk'|credential|api_key|client_secret|private|access_key|secret_access)[._ ]{0,3}(?i)(Id|Key|token){0,1}["']{0,1}:\s*['"]{0,1}([A-Za-z0-9+/]{20,40}={0,2})['"]{0,1}`}
+	AKSK      = []string{`(?i)["']{0,1}(secret|access|security|"ak"|"sk"|'ak'|'sk'|credential|api_key|client_secret|private|access_key|secret_access)[._ ]{0,3}(?i)(Id|Key|token){0,1}["']{0,1}:\s*['"]{0,1}([A-Za-z0-9+/]{20,80}={0,2})['"]{0,1}`}
 	TheKey    = []string{`((?i)enc.Utf8.parse|(?i)x-secret-id|(?i)ACCESS KEY SECRET|(?i)headerToSign)`}
 	Other     = []string{`(access.{0,1}key|access.{0,1}Key|access.{0,1}Id|access.{0,1}id|.{0,5}密码|.{0,5}账号|默认.{0,5}|加密|解密|password:.{0,10}|username:.{0,10})`}
 	Webhook   = []string{`\bhttps://qyapi.weixin.qq.com/cgi-bin/webhook/send\?key=[a-zA-Z0-9\-]{25,50}\b`, `\bhttps://oapi.dingtalk.com/robot/send\?access_token=[a-z0-9]{50,80}\b`, `\bhttps://open.feishu.cn/open-apis/bot/v2/hook/[a-z0-9\-]{25,50}\b`, `\bhttps://hooks.slack.com/services/[a-zA-Z0-9\-_]{6,12}/[a-zA-Z0-9\-_]{6,12}/[a-zA-Z0-9\-_]{15,24}\b`}

@@ -58,11 +58,13 @@ func Spider(u string, num int) {
 		request.Header.Set("Cookie", cmd.C)
 	}
 	// 添加Referer
+	config.Lock.Lock()
 	if referer, ok := result.Jstourl[u]; ok {
 		request.Header.Set("Referer", referer)
 	} else if referer, ok := result.Urltourl[u]; ok {
 		request.Header.Set("Referer", referer)
 	}
+	config.Lock.Unlock()
 	// 加载yaml配置(headers)
 	if cmd.I {
 		util.SetHeadersConfig(&request.Header)

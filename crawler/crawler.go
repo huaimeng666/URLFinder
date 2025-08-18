@@ -3,15 +3,21 @@ package crawler
 import (
 	"compress/gzip"
 	"fmt"
-	"github.com/pingc0y/URLFinder/cmd"
-	"github.com/pingc0y/URLFinder/config"
-	"github.com/pingc0y/URLFinder/result"
-	"github.com/pingc0y/URLFinder/util"
+	"github.com/huaimeng666/URLFinder/cmd"
+	"github.com/huaimeng666/URLFinder/config"
+	"github.com/huaimeng666/URLFinder/result"
+	"github.com/huaimeng666/URLFinder/util"
 	"io"
 	"net/http"
 	"net/url"
 	"regexp"
 	"strings"
+)
+
+var (
+	// 修改：预编译base标签正则
+	baseRegexCompiled = regexp.MustCompile(`(?i)<base\s+href\s*=\s*["']([^"']+)["']`)
+	baseVarRegexCompiled = regexp.MustCompile(`(?i)(?:base|baseUrl|basePath)\s*[:=]\s*["']([^"']+)["']`)
 )
 
 // 蜘蛛抓取页面内容
@@ -31,7 +37,7 @@ func Spider(u string, num int) {
 	//标记完成
 
 	u, _ = url.QueryUnescape(u)
-	if num > 1 && cmd.D != "" && !regexp.MustCompile(cmd.D).MatchString(u) {
+	if num > 1 && cmd.D != "" && !config.DomainRegex.MatchString(u) {  // 修改：使用预编译的domainRegex.MatchString
 		return
 	}
 	if GetEndUrl(u) {
@@ -101,13 +107,13 @@ func Spider(u string, num int) {
 
 	//处理base标签
 	var baseHref string
-	baseRegex := regexp.MustCompile(`(?i)<base\s+href\s*=\s*["']([^"']+)["']`)
-	baseMatch := baseRegex.FindStringSubmatch(resultBody)
+	// 修改：使用预编译的正则对象
+	baseMatch := baseRegexCompiled.FindStringSubmatch(resultBody)
 	if len(baseMatch) > 1 {
 		baseHref = baseMatch[1]
 	} else {
-		baseVarRegex := regexp.MustCompile(`(?i)(?:base|baseUrl|basePath)\s*[:=]\s*["']([^"']+)["']`)
-		baseVarMatch := baseVarRegex.FindStringSubmatch(resultBody)
+		// 修改：使用预编译的正则对象
+		baseVarMatch := baseVarRegexCompiled.FindStringSubmatch(resultBody)
 		if len(baseVarMatch) > 1 {
 			baseHref = baseVarMatch[1]
 		}

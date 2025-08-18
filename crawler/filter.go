@@ -1,7 +1,7 @@
 package crawler
 
 import (
-	"github.com/pingc0y/URLFinder/config"
+	"github.com/huaimeng666/URLFinder/config"
 	"net/url"
 	"regexp"
 	"strings"
@@ -30,8 +30,8 @@ func jsFilter(str [][]string) [][]string {
 
 		//过滤配置的黑名单
 		for i2 := range config.JsFiler {
-			re := regexp.MustCompile(config.JsFiler[i2])
-			is := re.MatchString(str[i][0])
+			// 修改：使用预编译的正则对象
+			is := config.JsFiler[i2].MatchString(str[i][0])
 			if is {
 				str[i][0] = ""
 				break
@@ -73,8 +73,8 @@ func urlFilter(str [][]string) [][]string {
 
 		//过滤配置的黑名单
 		for i2 := range config.UrlFiler {
-			re := regexp.MustCompile(config.UrlFiler[i2])
-			is := re.MatchString(str[i][0])
+			// 修改：使用预编译的正则对象
+			is := config.UrlFiler[i2].MatchString(str[i][0])
 			if is {
 				str[i][0] = ""
 				break

@@ -1,4 +1,4 @@
-module github.com/pingc0y/URLFinder
+module github.com/huaimeng666/URLFinder
 
 go 1.19
 

@@ -2,9 +2,9 @@ package util
 
 import (
 	"fmt"
-	"github.com/pingc0y/URLFinder/cmd"
-	"github.com/pingc0y/URLFinder/config"
-	"github.com/pingc0y/URLFinder/mode"
+	"github.com/huaimeng666/URLFinder/cmd"
+	"github.com/huaimeng666/URLFinder/config"
+	"github.com/huaimeng666/URLFinder/mode"
 	"math/rand"
 	"net/http"
 	"net/url"
@@ -12,6 +12,16 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+)
+
+var (
+	// 修改：预编译GetHost中的正则
+	hostRegex1 = regexp.MustCompile("([a-z0-9\\-]+\\.)*([a-z0-9\\-]+\\.[a-z0-9\\-]+)(:[0-9]+)?")
+	hostRegex2 = regexp.MustCompile("[^.]*?\\.[^.,^:]*")
+	hostRegex3 = regexp.MustCompile("\\.[^.]*?\\.[^.,^:]*")
+	ipRegex = regexp.MustCompile("(([01]?[0-9]{1,3}|2[0-4][0-9]|25[0-5])\\.){3}([01]?[0-9]{1,3}|2[0-4][0-9]|25[0-5])")
+	// 修改：预编译domainNameFilter中的正则
+	domainFilterRegex = regexp.MustCompile("://([a-z0-9\\-]+\\.)*([a-z0-9\\-]+\\.[a-z0-9\\-]+)(:[0-9]+)?")
 )
 
 // MergeArray 合并数组
@@ -107,42 +117,44 @@ func GetProtocol(domain string) string {
 		return domain
 	}
 
-	response, err := http.Get("https://" + domain)
+	// Try HTTPS first
+	resp, err := http.Get("https://" + domain)
 	if err == nil {
+		resp.Body.Close()
 		return "https://" + domain
 	}
-	response, err = http.Get("http://" + domain)
+
+	// Then try HTTP
+	resp, err = http.Get("http://" + domain)
 	if err == nil {
+		resp.Body.Close()
 		return "http://" + domain
 	}
-	defer response.Body.Close()
-	if response.TLS == nil {
-		return "http://" + domain
-	}
+
 	return ""
 }
 
 // 提取顶级域名
 func GetHost(u string) string {
-	re := regexp.MustCompile("([a-z0-9\\-]+\\.)*([a-z0-9\\-]+\\.[a-z0-9\\-]+)(:[0-9]+)?")
+	// 修改：使用预编译的正则对象
 	var host string
-	hosts := re.FindAllString(u, 1)
+	hosts := hostRegex1.FindAllString(u, 1)
 	if len(hosts) == 0 {
 		host = u
 	} else {
 		host = hosts[0]
 	}
-	re2 := regexp.MustCompile("[^.]*?\\.[^.,^:]*")
-	host2 := re2.FindAllString(host, -1)
-	re3 := regexp.MustCompile("(([01]?[0-9]{1,3}|2[0-4][0-9]|25[0-5])\\.){3}([01]?[0-9]{1,3}|2[0-4][0-9]|25[0-5])")
-	hostIp := re3.FindAllString(u, -1)
+	// 修改：使用预编译的正则对象
+	host2 := hostRegex2.FindAllString(host, -1)
+	// 修改：使用预编译的正则对象
+	hostIp := ipRegex.FindAllString(u, -1)
 	if len(hostIp) == 0 {
 		if len(host2) == 1 {
 			host = host2[0]
 		} else {
-			re3 := regexp.MustCompile("\\.[^.]*?\\.[^.,^:]*")
+			// 修改：使用预编译的正则对象
 			var ho string
-			hos := re3.FindAllString(host, -1)
+			hos := hostRegex3.FindAllString(host, -1)
 
 			if len(hos) == 0 {
 				ho = u
@@ -198,10 +210,10 @@ func PrintFuzz() {
 
 // 处理-d
 func domainNameFilter(url string) string {
-	re := regexp.MustCompile("://([a-z0-9\\-]+\\.)*([a-z0-9\\-]+\\.[a-z0-9\\-]+)(:[0-9]+)?")
-	hosts := re.FindAllString(url, 1)
+	// 修改：使用预编译的正则对象
+	hosts := domainFilterRegex.FindAllString(url, 1)
 	if len(hosts) != 0 {
-		if !regexp.MustCompile(cmd.D).MatchString(hosts[0]) {
+		if !config.DomainRegex.MatchString(hosts[0]) {  // 修改：使用预编译的domainRegex.MatchString
 			url = ""
 		}
 	}

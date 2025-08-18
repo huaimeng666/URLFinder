@@ -2,10 +2,11 @@ package config
 
 import (
 	"fmt"
-	"github.com/pingc0y/URLFinder/cmd"
-	"github.com/pingc0y/URLFinder/mode"
+	"github.com/huaimeng666/URLFinder/cmd"  // 新增import cmd，用于访问 cmd.C 等变量
+	"github.com/huaimeng666/URLFinder/mode"
 	"gopkg.in/yaml.v3"
 	"os"
+	"regexp"  // 新增import regexp，用于预编译
 	"strings"
 	"sync"
 )
@@ -30,41 +31,11 @@ var (
 		"list.js",
 		"upload.js",
 	}
-	JsFind = []string{
-		`(https{0,1}:[-a-zA-Z0-9（）@:%_\+.~#?&//=]{2,250}?[-a-zA-Z0-9（）@:%_\+.~#?&//=]{3}[.]js)`,
-		`["'‘“` + "`" + `]\s{0,6}(/{0,1}[-a-zA-Z0-9（）@:%_\+.~#?&//=]{2,250}?[-a-zA-Z0-9（）@:%_\+.~#?&//=]{3}[.]js)`,
-		`=\s{0,6}[",',’,”]{0,1}\s{0,6}(/{0,1}[-a-zA-Z0-9（）@:%_\+.~#?&//=]{2,250}?[-a-zA-Z0-9（）@:%_\+.~#?&//=]{3}[.]js)`,
-	}
-	UrlFind = []string{
-		`["'‘“` + "`" + `]\s{0,6}(https{0,1}:[-a-zA-Z0-9()@:%_\+.~#?&//={}]{2,250}?)\s{0,6}["'‘“` + "`" + `]`,
-		`=\s{0,6}(https{0,1}:[-a-zA-Z0-9()@:%_\+.~#?&//={}]{2,250})`,
-		`["'‘“` + "`" + `]\s{0,6}([#,.]{0,2}/[-a-zA-Z0-9()@:%_\+.~#?&//={}]{2,250}?)\s{0,6}["'‘“` + "`" + `]`,
-		`"([-a-zA-Z0-9()@:%_\+.~#?&//={}]+?[/]{1}[-a-zA-Z0-9()@:%_\+.~#?&//={}]+?)"`,
-		`href\s{0,6}=\s{0,6}["'‘“` + "`" + `]{0,1}\s{0,6}([-a-zA-Z0-9()@:%_\+.~#?&//={}]{2,250})|action\s{0,6}=\s{0,6}["'‘“` + "`" + `]{0,1}\s{0,6}([-a-zA-Z0-9()@:%_\+.~#?&//={}]{2,250})`,
-	}
+	JsFind = []*regexp.Regexp{}  // 修改：存储已编译的正则对象
+	UrlFind = []*regexp.Regexp{}  // 修改：存储已编译的正则对象
 
-	JsFiler = []string{
-		`github\.com|gitlab\.com|gitee\.com`,                                                              // 代码托管平台
-		`cdn\.jsdelivr\.net|tiny\.cloud|openoffice\.org|bpmn\.io|aspnetcdn\.com|axios-http\.com|iconify\.design|picsum\.photos|eligrey\.com`, // 知名开源组件/CDN
-		`applogcdn\.com|volccdn\.com|bytescm\.com|byteimg\.com`,                                                 // 国内厂商CDN(字节跳动)
-		`baidu\.com|amap\.com|qq\.com`,                                                                        // 国内通用平台
-		`youku\.com|bilibili\.com|zhihu\.com|weibo\.com|weibo\.cn|sohu\.com|ifeng\.com`,                         // 国内媒体及社交平台
-		`google\.com|google-analytics\.com|googleapis\.com|microsoft\.com|youtube\.com|cloudflare\.com`,                                                          // 国际通用平台
-		`www\.w3\.org|schema\.org|example\.com`,                                                                 // 技术标准及示例网站
-		`gov\.cn|gov\.com`,                                                                                    // 政府及相关域名
-	}
-	UrlFiler = []string{
-		`\.js\?|\.css\?|\.jpeg\?|\.jpg\?|\.png\?|.gif\?|www\.w3\.org|example\.com|<|>|\{|\}|\[|\]|\||\^|;|/js/|\.src|\.replace|\.url|\.att|\.href|location\.href|javascript:|location:|application/x-www-form-urlencoded|\.createObject|:location|\.path|\*#__PURE__\*|\*\$0\*|\n`,
-		`.*\.js$|.*\.css$|.*\.scss$|.*,$|.*\.jpeg$|.*\.jpg$|.*\.png$|.*\.gif$|.*\.ico$|.*\.svg$|.*\.vue$|.*\.ts$`,
-		`github\.com|gitlab\.com|gitee\.com`,                                                              // 代码托管平台
-		`cdn\.jsdelivr\.net|tiny\.cloud|openoffice\.org|bpmn\.io|aspnetcdn\.com|axios-http\.com|iconify\.design|picsum\.photos|eligrey\.com`, // 知名开源组件/CDN
-		`applogcdn\.com|volccdn\.com|bytescm\.com|byteimg\.com`,                                                 // 国内厂商CDN(字节跳动)
-		`baidu\.com|amap\.com|qq\.com`,                                                                        // 国内通用平台
-		`youku\.com|bilibili\.com|zhihu\.com|weibo\.com|weibo\.cn|sohu\.com|ifeng\.com`,                         // 国内媒体及社交平台
-		`google\.com|google-analytics\.com|googleapis\.com|microsoft\.com|youtube\.com|cloudflare\.com`,                                                          // 国际通用平台
-		`www\.w3\.org|schema\.org|example\.com`,                                                                 // 技术标准及示例网站
-		`gov\.cn|gov\.com`,  		
-	}
+	JsFiler = []*regexp.Regexp{}  // 修改：存储已编译的正则对象
+	UrlFiler = []*regexp.Regexp{}  // 修改：存储已编译的正则对象
 
 	Phone     = []string{`[^\w]((?:(?:\+|00)86)?1(?:(?:3[\d])|(?:4[5-79])|(?:5[0-35-9])|(?:6[5-7])|(?:7[0-8])|(?:8[\d])|(?:9[189]))\d{8})[^\w]`}
 	Email     = []string{`[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}`}
@@ -79,7 +50,8 @@ var (
 	Ip        = []string{`\b((?:(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\.){3}(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9]))\b`}
 	Swaggerui = []string{`((swagger-ui.html)|("swagger":)|(Swagger UI)|(swaggerUi)|(swaggerVersion))`}
 	Jdbc      = []string{`(jdbc:[a-z:]+://[a-z0-9\.\-_:;=/@?,&]+)`}
-	Infofind  = make(map[string][]string)
+	Infofind  = make(map[string][]*regexp.Regexp)
+	DomainRegex *regexp.Regexp  // 新增：预编译 -d 参数的正则（如果cmd.D不为空）
 )
 
 var (
@@ -96,6 +68,12 @@ var (
 	Urlch = make(chan int, cmd.T/10*7)
 )
 
+func Init() {
+	if cmd.D != "" {
+		DomainRegex = regexp.MustCompile(cmd.D)
+	}
+}
+
 // 读取配置文件
 func GetConfig(path string) {
 	if f, err := os.Open(path); err != nil {
@@ -106,10 +84,40 @@ func GetConfig(path string) {
 				"Accept":     "*/*",
 			}
 			Conf.Proxy = ""
-			Conf.JsFind = JsFind
-			Conf.UrlFind = UrlFind
-			Conf.JsFiler = JsFiler
-			Conf.UrlFiler = UrlFiler
+			Conf.JsFind = []string{  // 修改：使用字符串定义，但稍后编译
+				`(https{0,1}:[-a-zA-Z0-9（）@:%_\+.~#?&//=]{2,250}?[-a-zA-Z0-9（）@:%_\+.~#?&//=]{3}[.]js)`,
+				`["'‘“` + "`" + `]\s{0,6}(/{0,1}[-a-zA-Z0-9（）@:%_\+.~#?&//=]{2,250}?[-a-zA-Z0-9（）@:%_\+.~#?&//=]{3}[.]js)`,
+				`=\s{0,6}[",',’,”]{0,1}\s{0,6}(/{0,1}[-a-zA-Z0-9（）@:%_\+.~#?&//=]{2,250}?[-a-zA-Z0-9（）@:%_\+.~#?&//=]{3}[.]js)`,
+			}
+			Conf.UrlFind = []string{  // 修改：使用字符串定义，但稍后编译
+				`["'‘“` + "`" + `]\s{0,6}(https{0,1}:[-a-zA-Z0-9()@:%_\+.~#?&//={}]{2,250}?)\s{0,6}["'‘“` + "`" + `]`,
+				`=\s{0,6}(https{0,1}:[-a-zA-Z0-9()@:%_\+.~#?&//={}]{2,250})`,
+				`["'‘“` + "`" + `]\s{0,6}([#,.]{0,2}/[-a-zA-Z0-9()@:%_\+.~#?&//={}]{2,250}?)\s{0,6}["'‘“` + "`" + `]`,
+				`"([-a-zA-Z0-9()@:%_\+.~#?&//={}]+?[/]{1}[-a-zA-Z0-9()@:%_\+.~#?&//={}]+?)"`,
+				`href\s{0,6}=\s{0,6}["'‘“` + "`" + `]{0,1}\s{0,6}([-a-zA-Z0-9()@:%_\+.~#?&//={}]{2,250})|action\s{0,6}=\s{0,6}["'‘“` + "`" + `]{0,1}\s{0,6}([-a-zA-Z0-9()@:%_\+.~#?&//={}]{2,250})`,
+			}
+			Conf.JsFiler = []string{  // 修改：使用字符串定义，但稍后编译
+				`github\.com|gitlab\.com|gitee\.com`,
+				`cdn\.jsdelivr\.net|tiny\.cloud|openoffice\.org|bpmn\.io|aspnetcdn\.com|axios-http\.com|iconify\.design|picsum\.photos|eligrey\.com`,
+				`applogcdn\.com|volccdn\.com|bytescm\.com|byteimg\.com`,
+				`baidu\.com|amap\.com|qq\.com`,
+				`youku\.com|bilibili\.com|zhihu\.com|weibo\.com|weibo\.cn|sohu\.com|ifeng\.com`,
+				`google\.com|google-analytics\.com|googleapis\.com|microsoft\.com|youtube\.com|cloudflare\.com`,
+				`www\.w3\.org|schema\.org|example\.com`,
+				`gov\.cn|gov\.com`,
+			}
+			Conf.UrlFiler = []string{  // 修改：使用字符串定义，但稍后编译
+				`\.js\?|\.css\?|\.jpeg\?|\.jpg\?|\.png\?|gif\?|www\.w3\.org|example\.com|<|>|\{|\}|\[|\]|\||\^|;|/js/|\.src|\.replace|\.url|\.att|\.href|location\.href|javascript:|location:|application/x-www-form-urlencoded|\.createObject|:location|\.path|\*#__PURE__\*|\*\$0\*|\n`,
+				`.*\.js$|.*\.css$|.*\.scss$|.*,$|.*\.jpeg$|.*\.jpg$|.*\.png$|.*\.gif$|.*\.ico$|.*\.svg$|.*\.vue$|.*\.ts$`,
+				`github\.com|gitlab\.com|gitee\.com`,
+				`cdn\.jsdelivr\.net|tiny\.cloud|openoffice\.org|bpmn\.io|aspnetcdn\.com|axios-http\.com|iconify\.design|picsum\.photos|eligrey\.com`,
+				`applogcdn\.com|volccdn\.com|bytescm\.com|byteimg\.com`,
+				`baidu\.com|amap\.com|qq\.com`,
+				`youku\.com|bilibili\.com|zhihu\.com|weibo\.com|weibo\.cn|sohu\.com|ifeng\.com`,
+				`google\.com|google-analytics\.com|googleapis\.com|microsoft\.com|youtube\.com|cloudflare\.com`,
+				`www\.w3\.org|schema\.org|example\.com`,
+				`gov\.cn|gov\.com`,
+			}
 			Conf.JsFuzzPath = JsFuzzPath
 			Conf.JsSteps = JsSteps
 			Conf.UrlSteps = UrlSteps
@@ -146,12 +154,36 @@ func GetConfig(path string) {
 		os.Exit(1)
 	} else {
 		yaml.NewDecoder(f).Decode(&Conf)
-		JsFind = Conf.JsFind
-		UrlFind = Conf.UrlFind
-		JsFiler = Conf.JsFiler
-		UrlFiler = Conf.UrlFiler
+		// 修改：预编译JsFind
+		JsFind = make([]*regexp.Regexp, len(Conf.JsFind))
+		for i, r := range Conf.JsFind {
+			JsFind[i] = regexp.MustCompile(r)
+		}
+		// 修改：预编译UrlFind
+		UrlFind = make([]*regexp.Regexp, len(Conf.UrlFind))
+		for i, r := range Conf.UrlFind {
+			UrlFind[i] = regexp.MustCompile(r)
+		}
+		// 修改：预编译JsFiler
+		JsFiler = make([]*regexp.Regexp, len(Conf.JsFiler))
+		for i, r := range Conf.JsFiler {
+			JsFiler[i] = regexp.MustCompile(r)
+		}
+		// 修改：预编译UrlFiler
+		UrlFiler = make([]*regexp.Regexp, len(Conf.UrlFiler))
+		for i, r := range Conf.UrlFiler {
+			UrlFiler[i] = regexp.MustCompile(r)
+		}
 		JsFuzzPath = Conf.JsFuzzPath
-		Infofind = Conf.InfoFind
+		// 修改：预编译InfoFind中的正则表达式
+		Infofind = make(map[string][]*regexp.Regexp)
+		for key, regexps := range Conf.InfoFind {
+			compiled := make([]*regexp.Regexp, len(regexps))
+			for i, r := range regexps {
+				compiled[i] = regexp.MustCompile(r)  // 编译正则并存储
+			}
+			Infofind[key] = compiled
+		}
 		JsSteps = Conf.JsSteps
 		UrlSteps = Conf.UrlSteps
 		Risks = Conf.Risks

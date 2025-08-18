@@ -59,7 +59,7 @@ Options:
 
 func Parse() {
 	color.LightCyan.Printf("  _   _ ____  _     _____ _           _                    \n | | | |  _ \\| |   |  ___(_)_ __   __| | ___ _ __  \n | | | | |_) | |   | |_  | | '_ \\ / _` |/ _ \\ '__|\n | |_| |  _ <| |___|  _| | | | | | (_| |  __/ |\n  \\___/|_| \\_\\_____|_|   |_|_| |_|\\__,_|\\___|_|")
-	color.LightBlue.Printf("\nV 0.4")
+	color.LightBlue.Printf("\nV 0.5")
 	color.LightBlue.Printf("\nby huaimeng")	
 	color.LightBlue.Printf("\nhttps://github.com/huaimeng666/URLFinder")
 	color.LightBlue.Printf("\n搜索敏感信息必须搭配-i命令使用，不然只是爬虫搜索js和域名信息！！！ \n")

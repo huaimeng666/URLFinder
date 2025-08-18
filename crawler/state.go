@@ -1,11 +1,11 @@
 package crawler
 
 import (
-	"github.com/pingc0y/URLFinder/cmd"
-	"github.com/pingc0y/URLFinder/config"
-	"github.com/pingc0y/URLFinder/mode"
-	"github.com/pingc0y/URLFinder/result"
-	"github.com/pingc0y/URLFinder/util"
+	"github.com/huaimeng666/URLFinder/cmd"
+	"github.com/huaimeng666/URLFinder/config"
+	"github.com/huaimeng666/URLFinder/mode"
+	"github.com/huaimeng666/URLFinder/result"
+	"github.com/huaimeng666/URLFinder/util"
 	"io"
 	"net/http"
 	"net/url"

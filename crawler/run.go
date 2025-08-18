@@ -5,11 +5,11 @@ import (
 	"crypto/tls"
 	"flag"
 	"fmt"
-	"github.com/pingc0y/URLFinder/cmd"
-	"github.com/pingc0y/URLFinder/config"
-	"github.com/pingc0y/URLFinder/mode"
-	"github.com/pingc0y/URLFinder/result"
-	"github.com/pingc0y/URLFinder/util"
+	"github.com/huaimeng666/URLFinder/cmd"
+	"github.com/huaimeng666/URLFinder/config"
+	"github.com/huaimeng666/URLFinder/mode"
+	"github.com/huaimeng666/URLFinder/result"
+	"github.com/huaimeng666/URLFinder/util"
 	"io"
 	"net"
 	"net/http"
@@ -21,6 +21,13 @@ import (
 )
 
 var client *http.Client
+
+var (
+	// 修改：预编译主机正则（用于start等）
+	runHostRegex = regexp.MustCompile("([a-z0-9\\-]+\\.)*([a-z0-9\\-]+\\.[a-z0-9\\-]+)(:[0-9]+)?")
+	// 修改：预编译URL正则（用于AppendJs等）
+	urlParseRegex = regexp.MustCompile("[a-zA-z]+://[^\\s]*/|[a-zA-z]+://[^\\s]*")
+)
 
 func load() {
 
@@ -91,7 +98,7 @@ func load() {
 			return nil
 		},
 	}
-
+	
 }
 
 func Run() {
@@ -282,8 +289,8 @@ func AppendJs(ur string, urltjs string) int {
 	if strings.HasSuffix(urltjs, ".js") {
 		result.Jsinurl[ur] = result.Jsinurl[urltjs]
 	} else {
-		re := regexp.MustCompile("[a-zA-z]+://[^\\s]*/|[a-zA-z]+://[^\\s]*")
-		u := re.FindAllStringSubmatch(urltjs, -1)
+		// 修改：使用预编译的正则对象
+		u := urlParseRegex.FindAllStringSubmatch(urltjs, -1)
 		result.Jsinurl[ur] = u[0][0]
 	}
 	result.Jstourl[ur] = urltjs

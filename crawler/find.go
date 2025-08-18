@@ -1,10 +1,10 @@
 package crawler
 
 import (
-	"github.com/pingc0y/URLFinder/cmd"
-	"github.com/pingc0y/URLFinder/config"
-	"github.com/pingc0y/URLFinder/mode"
-	"github.com/pingc0y/URLFinder/result"
+	"github.com/huaimeng666/URLFinder/cmd"
+	"github.com/huaimeng666/URLFinder/config"
+	"github.com/huaimeng666/URLFinder/mode"
+	"github.com/huaimeng666/URLFinder/result"
 	"net"
 	"net/mail"
 	"regexp"
@@ -23,9 +23,9 @@ func jsFind(cont, host, scheme, path, source string, num int) {
 	}
 	//js匹配正则
 	host = scheme + "://" + host
-	for _, re := range config.JsFind {
-		reg := regexp.MustCompile(re)
-		jss := reg.FindAllStringSubmatch(cont, -1)
+	for i, reg := range config.JsFind {  // 修改：使用预编译的reg对象
+		_ = i  // 避免未使用警告
+		jss := reg.FindAllStringSubmatch(cont, -1)  // 修改：直接使用reg.FindAllStringSubmatch
 		//return
 		jss = jsFilter(jss)
 		//循环提取js放到结果中
@@ -110,9 +110,9 @@ func urlFind(cont, host, scheme, path, source string, num int) {
 
 	//url匹配正则
 
-	for _, re := range config.UrlFind {
-		reg := regexp.MustCompile(re)
-		urls := reg.FindAllStringSubmatch(cont, -1)
+	for i, reg := range config.UrlFind {  // 修改：使用预编译的reg对象
+		_ = i  // 避免未使用警告
+		urls := reg.FindAllStringSubmatch(cont, -1)  // 修改：直接使用reg.FindAllStringSubmatch
 		//fmt.Println(urls)
 		urls = urlFilter(urls)
 
@@ -233,8 +233,8 @@ func infoFind(cont, source string) {
 	foundValues := make(map[string]map[string]bool)
 
 	for key, regexps := range config.Infofind {
-		for _, regexpstr := range regexps {
-			values := regexp.MustCompile(regexpstr).FindAllStringSubmatch(cont, -1)
+		for _, re := range regexps {  // 修改：使用已编译的re对象
+			values := re.FindAllStringSubmatch(cont, -1)  // 修改：直接使用re.FindAllStringSubmatch
 			if values != nil {
 				for _, value := range values {
 					var matchedValue string

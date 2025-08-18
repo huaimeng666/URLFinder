@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/pingc0y/URLFinder/cmd"
-	"github.com/pingc0y/URLFinder/crawler"
+	"github.com/huaimeng666/URLFinder/cmd"
+	"github.com/huaimeng666/URLFinder/config"
+	"github.com/huaimeng666/URLFinder/crawler"
 	"io"
 	"log"
 )
@@ -10,5 +11,6 @@ import (
 func main() {
 	log.SetOutput(io.Discard)
 	cmd.Parse()
+	config.Init()
 	crawler.Run()
 }
